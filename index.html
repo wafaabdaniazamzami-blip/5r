@@ -98,7 +98,7 @@ const TG=[[1,226,508,8,90],[2,322,261,28,0],[3,165,103,9,90],[4,553,530,24,180],
 const DS=[[87,373,100,26,340],[69,462,113,12,90],[72,770,103,34,130],[75,150,153,14,320],[57,298,152,36,300,'b'],[51,484,142,34,350,'i'],[78,540,160,10,90],[54,600,160,32,70],[63,715,178,10,90],[66,225,215,14,90],[84,305,213,20,90,'b'],[60,464,210,52,180,'b'],[81,628,208,28,120],[90,708,222,22,170,'i'],[74,213,272,54,340],[65,262,277,13,90],[89,380,268,40,180,'b'],[77,448,265,20,100],[86,539,263,22,90],[80,606,271,46,150],[53,673,270,48,110],[62,775,268,32,0],[83,232,342,48,90],[56,310,325,26,0],[68,757,347,46,0],[59,468,401,24,180],[50,562,372,26,180],[71,748,398,24,180],[55,228,462,38,330],[64,312,438,24,120],[61,592,430,10,90],[52,730,478,46,100],[88,680,490,11,90],[58,455,495,52,0,'b'],[76,560,483,22,0],[82,316,520,13,90],[85,372,540,36,190],[67,510,543,26,160],[79,610,548,22,0],[70,712,555,13,90]];
 const STG=[{n:'Ringkas',t:'Ringkas: pilah yang perlu! Coret 1–49 berurutan, abaikan 50–90.',d:1},{n:'Rapi',t:'Rapi: coret 1–49 berurutan, jangan ada yang terlewat.'},{n:'Zona Kerja',t:'Area kerja terbagi 9 zona. Coret 1–49 berurutan.',z:1},
 {n:'Resik',t:'Resik: angka di tabel berantakan (miring). Coret 1–49.',g:1,m:'r'},{n:'Rawat',t:'Rawat: ukuran huruf beda-beda, tetap teliti!',g:1,m:'s'},{n:'Rajin',t:'Rajin: coret 1–49, lalu periksa — angka berapa yang hilang dari papan?',d:1},
-{n:'Angka Hilang',t:'Ada 2 angka yang hilang di rak — lewati, lalu tulis angka apa yang hilang!',g:1,m:'p',skip:[8,42]},{n:'Diagonal',t:'Urutan menyilang di dalam tabel.',g:1,m:'d'}];
+{n:'Angka Hilang',t:'Ada 2 angka yang hilang di rak — lewati, lalu tulis angka apa yang hilang!',g:1,m:'p',skip:[8,42]},{n:'Diagonal',t:'Ikuti urutan menyilang (diagonal). Satu coretan ↗ boleh melewati beberapa angka berurutan!',g:1,m:'d'}];
 
 const JAWAB_HILANG=73; // jawaban soal Tahap 6: angka 50–90 yang tidak muncul di papan (ubah di sini bila berbeda)
 const ANS={5:{q:'Angka berapa (1–90) yang TIDAK ada di papan?',a:[JAWAB_HILANG],n:1},6:{q:'Angka berapa saja yang HILANG dari tabel? (isi 2 angka)',a:[8,42],n:2}}; // kunci jawaban Tahap 6 & 7
@@ -163,6 +163,12 @@ function mk(i,cb,view){
   bd.addEventListener('pointermove',ev=>{if(!p0)return;const p=rel(ev,R0);cur.setAttribute('x2',p.x);cur.setAttribute('y2',p.y)});
   const end=ev=>{if(!p0)return;const a=p0,p1=rel(ev,R0);p0=null;if(cur){cur.remove();cur=null}
    const vx=p1.x-a.x,vy=p1.y-a.y,len=Math.hypot(vx,vy);if(len<14)return; // sentuhan singkat diabaikan
+   if(S.m==='d'){ // Tahap 8: satu coretan boleh melewati beberapa angka berurutan di diagonal
+    const nr=q=>{const c=q.cen(R0),t=((c.x-a.x)*vx+(c.y-a.y)*vy)/(len*len);return{q,t,d:Math.hypot(c.x-(a.x+t*vx),c.y-(a.y+t*vy))/q.rad(R0)}};
+    const hs=items.filter(free).map(nr).filter(x=>x.d<=.75&&x.t>=-.1&&x.t<=1.1).sort((u,w)=>u.t-w.t);
+    if(hs.length>1){const th=Math.atan2(-vy,vx)*180/Math.PI;
+     if(hs.every((x,k)=>x.q.n===seq[nx+k])&&th>=15&&th<=75){hs.forEach(x=>ok(x.q));return}
+     line(a,p1,'#e11',true);bad();return}}
    const tgt=items.find(q=>q.n===seq[nx]);let o=null;
    const near=q=>{const c=q.cen(R0),t=((c.x-a.x)*vx+(c.y-a.y)*vy)/(len*len);if(t<.1||t>.9)return 9;return Math.hypot(c.x-(a.x+t*vx),c.y-(a.y+t*vy))/q.rad(R0)};
    if(tgt&&near(tgt)<=.75)o=tgt;else{let bs=.75;items.forEach(q=>{if(!free(q))return;const d=near(q);if(d<bs){bs=d;o=q}})}
