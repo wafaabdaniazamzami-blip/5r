@@ -84,7 +84,7 @@ summary{cursor:pointer;font-weight:800}input{font-family:inherit}
 <script>
 const $=document.getElementById('app'),h=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 // ===== PENGATURAN: tempel URL Web App Apps Script (yang berakhiran /exec) di sini =====
-const API_URL='PASTE_URL_WEB_APP_DI_SINI';
+const API_URL='https://script.google.com/macros/s/AKfycbyDzqxoGVaioFZ7DxU9VsK82eAdwVz7LcWstVcERCHEFC38-yGAr8UBlIbAjFHH_KwG/exec';
 const api=(f,...a)=>fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:f,args:a})})
  .then(r=>r.json()).then(j=>{if(!j.ok)throw new Error(j.error||'Gagal terhubung ke server');return j.data});
 const DEF=[60,50,40,30,20,10,10,10];let TM=[],PARAM={},PIN='';
