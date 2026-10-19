@@ -202,7 +202,7 @@ const stage=(ps,sm)=>{const w=h('div','stg');w.append(logoBig(),h('div','sub','�
 function tiles(el,ps){const k=ps.map(p=>p.pid+p.avatar+p.name).join();if(el._k===k)return;el._k=k;el.replaceChildren(...ps.map(p=>{const t=h('div','tile');t.append(av(p.avatar,52),h('div','',p.name));return t}))}
 function confetti(){for(let i=0;i<70;i++){const c=h('i','cf');c.style.cssText=`left:${Math.random()*100}vw;background:hsl(${Math.random()*360},90%,60%);animation-delay:${Math.random()*1.5}s;animation-duration:${2+Math.random()*2}s`;document.body.appendChild(c);setTimeout(()=>c.remove(),5600)}}
 function cu(el,to,ms=900){const t=performance.now();(function f(n){const p=Math.min(1,(n-t)/ms);el.textContent=Math.round(to*p);if(p<1)requestAnimationFrame(f)})(t)}
-function poll(code,fn,ms=2500){const t=async()=>{try{fn(await api('getBoard',code))}catch(e){}};t();TM.push(setInterval(t,ms))}
+function poll(code,fn,ms=1200){let busy=false;const t=async()=>{if(busy)return;busy=true;try{fn(await api('getBoard',code))}catch(e){}busy=false};t();TM.push(setInterval(t,ms))}
 const inp=(ph,mode,max)=>{const i=h('input');i.placeholder=ph;if(mode)i.inputMode=mode;if(max)i.maxLength=max;return i};
 const fld=(ic,ph,mode,max)=>{const w=h('label','fld'),i=inp(ph,mode,max);w.append(h('span','',ic),i);w.i=i;return w};
 for(let i=0;i<28;i++){const f=h('span','fl',1+Math.floor(Math.random()*90));f.style.cssText=`left:${Math.random()*95}vw;font-size:${22+Math.random()*52}px;animation-duration:${12+Math.random()*16}s;animation-delay:-${Math.random()*24}s`;document.body.appendChild(f)}
@@ -229,7 +229,7 @@ async function join(code,name,btn){
 
 function admin(code){clean();setTheme('night');$.classList.add('wide');let first=true,B=null,lastKey='',t0=0,cur=null,run=null;
  const ins=DEF.map(t=>{const i=h('input');i.type='number';i.min=5;i.value=t;return i}),times=()=>ins.map(i=>+i.value||10);
- const pull=async()=>{try{B=await api('getBoard',code);render()}catch(e){}};
+ let pbusy=false;const pull=async()=>{if(pbusy)return;pbusy=true;try{B=await api('getBoard',code);render()}catch(e){}pbusy=false};
  const act=p=>api('setGame',code,p).then(pull).catch(e=>alert(String(e.message||e).replace(/^Error: /,'')));
  const mb=h('button','big');mb.onclick=()=>cur&&act(Object.assign({times:times()},cur));
  const prg=h('div','prg'),pi=h('i'),pl=h('b');prg.append(pi,pl);const tp=h('div','tpill','00:00'),cpill=h('div','pill','Kode '+code);
@@ -271,7 +271,7 @@ function admin(code){clean();setTheme('night');$.classList.add('wide');let first
  $.replaceChildren(hd,mg);
  TM.push(setInterval(()=>{if(!B||!run)return;const lim=B.times[B.stage]||10,el=(Date.now()-t0)/1000-3,left=Math.max(0,lim-Math.max(0,el));mBpm=96+B.stage*7+(left<=10?34:0);mUrg=left<=10&&el>=0;music(el>=0&&left>0&&B.status==='running');
   tp.textContent=el<0?'⏳ '+Math.ceil(-el):'⏱ '+fmtT(left);pi.style.width=(B.stage+1)/8*100+'%';pl.textContent='Tahap '+(B.stage+1)+'/8';ctrl()},250));
- pull();TM.push(setInterval(pull,2000))}
+ pull();TM.push(setInterval(pull,1000))}
 
 function play(code,pid,mine,pname){clean();music(false);setTheme('night');$.classList.remove('wide');
  let B=null,st=0,doneN=0,scores=[],phase='wait',correct=0,wrong=0,streak=0,t0=0,limit=0,left=0,iv=null,sv=null,fin=false,allS=false,ansD=false,ansB=0,rkEl=null,ovEl=null;
@@ -282,7 +282,7 @@ function play(code,pid,mine,pname){clean();music(false);setTheme('night');$.clas
  $.replaceChildren(hd,me2,bar,h('div','rot','💡 Putar HP ke landscape supaya angka lebih besar'),area,lbc);
  const wc=h('div','card dn');wc.append(av(mine,110,true),h('div','hint',pname+', kamu sudah masuk! 🎉'),h('div','sub','Menunggu admin memulai…'),r5(),wt);area.appendChild(wc);
  const tot=()=>scores.reduce((a,b)=>a+(b||0),0),live=()=>Math.max(0,correct*10-wrong*5+ansB);
- const send=()=>{sv=null;api('saveScore',code,pid,scores,doneN,fin,streak).catch(()=>{})},sched=()=>{if(!sv)sv=setTimeout(send,1200)};
+ const send=()=>{sv=null;api('saveScore',code,pid,scores,doneN,fin,streak).catch(()=>{})},sched=()=>{if(!sv)sv=setTimeout(send,900)};
  const upd=()=>{scores[st]=live();sc.textContent=tot()+' poin'+(streak>=3?' 🔥'+streak:'');sched()};
  function runStage(){st=B.stage;hd.style.display=me2.style.display=bar.style.display='';pl.textContent='Tahap '+(st+1)+'/8';pi.style.width=(st+1)/8*100+'%';bi.style.width='100%';bar.classList.remove('low');
   const L=B.times[st]||10;tp.textContent='⏱ '+fmtT(L);const c=h('div','card dn'),cd=h('div','cd',3);
