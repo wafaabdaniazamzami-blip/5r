@@ -87,7 +87,7 @@ const $=document.getElementById('app'),h=(t,c,x)=>{const e=document.createElemen
 const API_URL='https://script.google.com/macros/s/AKfycbyDzqxoGVaioFZ7DxU9VsK82eAdwVz7LcWstVcERCHEFC38-yGAr8UBlIbAjFHH_KwG/exec';
 const api=(f,...a)=>fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:f,args:a})})
  .then(r=>r.json()).then(j=>{if(!j.ok)throw new Error(j.error||'Gagal terhubung ke server');return j.data});
-const DEF=[60,50,40,30,20,10,10,10];let TM=[],PARAM={},PIN='';
+const DEF=[60,50,40,30,20,10,10,10];let TM=[],PARAM={};
 const clean=()=>{TM.forEach(t=>{clearInterval(t);clearTimeout(t)});TM=[]};
 // [angka, x, y, ukuran, rotasi, gaya] - koordinat mengikuti file PDF (area 110..810 x 80..580)
 const TG=[[1,226,508,8,90],[2,322,261,28,0],[3,165,103,9,90],[4,553,530,24,180],[5,508,293,10,0,'i'],[6,355,166,14,180,'b'],[7,777,445,16,90,'b'],[8,615,328,22,90],[9,688,150,10,0],[10,298,487,32,0],
@@ -214,10 +214,10 @@ function home(msg){if(!msg&&/^PASTE/.test(API_URL))msg='⚠ URL backend belum di
  const f1=fld('🎮','Kode game (6 angka)','numeric',6),f2=fld('👤','Nama kamu',null,20),b=h('button','big','Masuk ▶'),c=h('div','card');
  if(PARAM.code)f1.i.value=PARAM.code;b.onclick=()=>join(f1.i.value.trim(),f2.i.value.trim(),b);c.append(f1,f2,picker(),b);if(msg)c.appendChild(h('div','err',msg));
  const mas=h('div','mas'),sg=h('div','sign');sg.append(h('b','','🏭 5R di Tempat Kerja'),h('br'),'📦 Ringkas — pilah yang perlu',h('br'),'🗂️ Rapi — tata & beri label',h('br'),'🧹 Resik — bersihkan',h('br'),'🔧 Rawat — jaga standar',h('br'),'💪 Rajin — disiplin');mas.append(av('c5|helm|🧹|#ffcf33',220,true),sg);
- const a=h('details','card');a.appendChild(h('summary','','🔑 Masuk Admin'));const pf=fld('🔑','Kode admin (4 angka)','numeric',4);pf.i.type='password';
+ const a=h('details','card');a.appendChild(h('summary','','🛠 Admin / Host'));
  const nb=h('button','big','Buat permainan'),eb=h('button','s','Buka permainan lama (isi kode game di atas)');eb.style.color='#16324a';
- nb.onclick=async()=>{PIN=pf.i.value.trim();try{admin(await api('createGame',PIN,DEF))}catch(e){alert(String(e.message||e).replace(/^Error: /,''))}};
- eb.onclick=()=>{PIN=pf.i.value.trim();if(f1.i.value.trim())admin(f1.i.value.trim())};a.append(pf,nb,eb);
+ nb.onclick=async()=>{try{admin(await api('createGame',DEF))}catch(e){alert(String(e.message||e).replace(/^Error: /,''))}};
+ eb.onclick=()=>{if(f1.i.value.trim())admin(f1.i.value.trim())};a.append(nb,eb);
  const hm=h('div','hm');hm.append(mas,c);const t=h('div','sub','Game 5R Tempat Kerja • coret angka berurutan, makin lama makin cepat!');t.style.fontWeight='800';
  $.replaceChildren(logoBig(),t,r5(),hm,a)}
 async function join(code,name,btn){
@@ -230,7 +230,7 @@ async function join(code,name,btn){
 function admin(code){clean();setTheme('night');$.classList.add('wide');let first=true,B=null,lastKey='',t0=0,cur=null,run=null;
  const ins=DEF.map(t=>{const i=h('input');i.type='number';i.min=5;i.value=t;return i}),times=()=>ins.map(i=>+i.value||10);
  const pull=async()=>{try{B=await api('getBoard',code);render()}catch(e){}};
- const act=p=>api('setGame',PIN,code,p).then(pull).catch(e=>alert(String(e.message||e).replace(/^Error: /,'')));
+ const act=p=>api('setGame',code,p).then(pull).catch(e=>alert(String(e.message||e).replace(/^Error: /,'')));
  const mb=h('button','big');mb.onclick=()=>cur&&act(Object.assign({times:times()},cur));
  const prg=h('div','prg'),pi=h('i'),pl=h('b');prg.append(pi,pl);const tp=h('div','tpill','00:00'),cpill=h('div','pill','Kode '+code);
  const bs=h('button','s','⚙ Pengaturan'),bx=h('button','s','Keluar');bx.onclick=()=>home();
